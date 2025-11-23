@@ -1,6 +1,7 @@
 package com.doeaqui.sboot_doe_aqui_monolith.service;
 
 import com.doeaqui.sboot_doe_aqui_monolith.domain.Hemocentro;
+import com.doeaqui.sboot_doe_aqui_monolith.model.HemocentroPorLocalizacaoResponse;
 import com.doeaqui.sboot_doe_aqui_monolith.model.NewHemocentroRequest;
 import com.doeaqui.sboot_doe_aqui_monolith.model.UpdateHemocentroRequest;
 
@@ -13,5 +14,5 @@ public interface HemocentroService {
     List<Hemocentro> getHemocentroByFilter(String nome, String telefone, String email);
     Hemocentro patchHemocentroInfo(Integer idHemocentro, UpdateHemocentroRequest updateHemocentroRequest);
     void deleteHemocentro(Integer idHemocentro);
-    List<Hemocentro> getHemocentroByLocation(Double latitude, Double longitude, Integer raio);
+    List<HemocentroPorLocalizacaoResponse> getHemocentroByLocation(Double latitude, Double longitude, Integer raio);
 }

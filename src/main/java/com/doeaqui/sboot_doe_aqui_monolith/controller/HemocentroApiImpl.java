@@ -3,6 +3,7 @@ package com.doeaqui.sboot_doe_aqui_monolith.controller;
 import com.doeaqui.sboot_doe_aqui_monolith.api.HemocentroApiDelegate;
 import com.doeaqui.sboot_doe_aqui_monolith.domain.Hemocentro;
 import com.doeaqui.sboot_doe_aqui_monolith.mapper.HemocentroMapper;
+import com.doeaqui.sboot_doe_aqui_monolith.model.HemocentroPorLocalizacaoResponse;
 import com.doeaqui.sboot_doe_aqui_monolith.model.HemocentroResponse;
 import com.doeaqui.sboot_doe_aqui_monolith.model.NewHemocentroRequest;
 import com.doeaqui.sboot_doe_aqui_monolith.model.UpdateHemocentroRequest;
@@ -63,9 +64,8 @@ public class HemocentroApiImpl implements HemocentroApiDelegate {
 
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'DOADOR', 'DOADOR_PACIENTE')")
-    public ResponseEntity<List<HemocentroResponse>> getHemocentroByLocation(Double latitude, Double longitude, Integer raio) {
-        List<Hemocentro> hemocentroList = service.getHemocentroByLocation(latitude, longitude, raio);
-        List<HemocentroResponse> responseList = mapper.toHemocentroResponseList(hemocentroList);
-        return ResponseEntity.ok(responseList);
+    public ResponseEntity<List<HemocentroPorLocalizacaoResponse>> getHemocentroByLocation(Double latitude, Double longitude, Integer raio) {
+        List<HemocentroPorLocalizacaoResponse> hemocentroList = service.getHemocentroByLocation(latitude, longitude, raio);
+        return ResponseEntity.ok(hemocentroList);
     }
 }

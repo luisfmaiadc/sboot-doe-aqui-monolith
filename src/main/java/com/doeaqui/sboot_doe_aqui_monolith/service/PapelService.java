@@ -7,4 +7,5 @@ import java.util.List;
 public interface PapelService {
 
     List<Papel> getPapeisUsuarios();
+    Papel getPapelById(Integer idPapel);
 }

@@ -45,5 +45,10 @@ public interface HemocentroRepositoryImpl extends HemocentroRepository {
 
     @Override
     @SqlQuery
-    Set<Integer> getHemocentroIfHasSolicitacaoDoacao(@BindList("hemocentroIdList") List<Integer> hemocentroIdList, @BindList("tipoSanguineoIdList") List<Byte> tipoSanguineoIdList);
+    Set<Integer> getHemocentroIfHasSolicitacaoDoacao(@BindList("hemocentroIdList") List<Integer> hemocentroIdList, @Bind("idUsuario") Integer idUsuario, @BindList("tipoSanguineoIdList") List<Byte> tipoSanguineoIdList);
+
+    @Override
+    @SqlQuery
+    @RegisterBeanMapper(Hemocentro.class)
+    List<Hemocentro> getHemocentrosInfoByIds(@BindList("hemocentroIdList") List<Integer> hemocentroIdList);
 }

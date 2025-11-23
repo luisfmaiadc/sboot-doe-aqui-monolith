@@ -15,11 +15,15 @@ import com.doeaqui.sboot_doe_aqui_monolith.service.TipoSanguineoService;
 import com.doeaqui.sboot_doe_aqui_monolith.service.UsuarioService;
 import com.doeaqui.sboot_doe_aqui_monolith.util.AppUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UsuarioServiceImpl implements UsuarioService {
@@ -30,27 +34,34 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final PapelService papelService;
     private final TipoSanguineoService tipoSanguineoService;
 
+    private static final Set<String> supportedGendersSet = Set.of("M", "F", "O");
+
     @Override
     @Transactional
     public UsuarioResponse postNewUser(NewUsuarioRequest usuarioRequest) {
+        log.info("[UsuarioServiceImpl] Iniciando cadastro de novo usuário.");
         validateNewUserRequest(usuarioRequest);
         Usuario newUser = usuarioMapper.toUsuario(usuarioRequest);
         newUser.setAtivo(Boolean.TRUE);
         int generatedId = usuarioRepository.postNewUser(newUser);
         loginService.postNewLogin(usuarioRequest.getLogin(), generatedId);
+        log.info("[UsuarioServiceImpl] Usuário cadastrado com sucesso. ID gerado: {}.", generatedId);
         return getUserInfoById(generatedId);
     }
 
     @Override
     public UsuarioResponse getUserInfoById(Integer id) {
+        log.info("[UsuarioServiceImpl] Buscando informações do usuário com ID: {}", id);
         Optional<UsuarioResponse> optionalUsuario = usuarioRepository.getUserInfoById(id);
         if (optionalUsuario.isEmpty()) throw new ResourceNotFoundException("Nenhuma informação do usuário foi encontrada.");
+        log.info("[UsuarioServiceImpl] Informações do usuário {} encontradas com sucesso.", id);
         return optionalUsuario.get();
     }
 
     @Override
     @Transactional
     public UsuarioResponse patchUserInfo(Integer idUsuario, UpdateUsuarioRequest updateRequest) {
+        log.info("[UsuarioServiceImpl] Iniciando atualização de informações do usuário com ID: {}", idUsuario);
         AppUtils.requireAtLeastOneNonNull(Arrays.asList(updateRequest.getEmail(), updateRequest.getSenha(), updateRequest.getGenero(),
                 updateRequest.getTelefone(), updateRequest.getIdPapel()));
 
@@ -64,10 +75,12 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new IllegalArgumentException("Informe ao menos um campo para atualizar ou os valores informados são os mesmos dos atuais.");
 
         if (userFieldsChanged) {
+            log.info("[UsuarioServiceImpl] Atualizando informações do usuário {}.", idUsuario);
             usuarioRepository.patchUserInfo(userInfo);
         }
 
         if (loginFieldsChanged) {
+            log.info("[UsuarioServiceImpl] Atualizando informações de login do usuário {}.", idUsuario);
             loginService.patchLoginInfo(idUsuario, updateRequest);
         }
 
@@ -77,9 +90,11 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public void deleteUser(Integer idUsuario) {
+        log.info("[UsuarioServiceImpl] Inativando usuário com ID: {}", idUsuario);
         UsuarioResponse usuario = getUserInfoById(idUsuario);
         if (Objects.equals(usuario.getAtivo(), Boolean.FALSE)) throw new IllegalArgumentException("Usuário já desativado.");
         usuarioRepository.deleteUser(idUsuario);
+        log.info("[UsuarioServiceImpl] Usuário com ID: {} inativado com sucesso.", idUsuario);
     }
 
     private void validateNewUserRequest(NewUsuarioRequest usuarioRequest) {
@@ -87,6 +102,15 @@ public class UsuarioServiceImpl implements UsuarioService {
         validateCpf(usuarioRequest.getCpf());
         validateTipoSanguineo(usuarioRequest.getIdTipoSanguineo());
         validatePapel(usuarioRequest.getLogin().getIdPapel());
+        validateIdade(usuarioRequest.getLogin().getIdPapel(), usuarioRequest.getDataNascimento());
+    }
+
+    private void validateIdade(Integer idPapel, LocalDate dataNascimento) {
+        Papel papel = papelService.getPapelById(idPapel);
+        if (!papel.getNome().equals("PACIENTE")) {
+            int idade = Period.between(dataNascimento, LocalDate.now()).getYears();
+            if (idade < 16) throw new IllegalArgumentException("É necessário ter no mínimo 16 anos para se cadastrar como doador.");
+        }
     }
 
     private void validateTipoSanguineo(Integer idTipoSanguineo) {
@@ -96,13 +120,11 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     private void validatePapel(Integer idPapel) {
-        List<Papel> papelList = papelService.getPapeisUsuarios();
-        if (papelList.stream().noneMatch(papel -> papel.getId() == idPapel.byteValue())
-                || idPapel.byteValue() == 1) throw new IllegalArgumentException("Papel informado inválido.");
+        Papel papel = papelService.getPapelById(idPapel);
+        if (papel.getNome().equals("ADMIN")) throw new IllegalArgumentException("Papel inválido.");
     }
 
     private void validadeGenders(String gender) {
-        final Set<String> supportedGendersSet = Set.of("M", "F", "O");
         if (!supportedGendersSet.contains(gender))
             throw new IllegalArgumentException("Gênero informado não suportado.");
     }

@@ -6,7 +6,6 @@ import com.doeaqui.sboot_doe_aqui_monolith.mapper.PapelMapper;
 import com.doeaqui.sboot_doe_aqui_monolith.model.PapelResponse;
 import com.doeaqui.sboot_doe_aqui_monolith.service.PapelService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,7 +19,6 @@ public class PapelApiImpl implements PapelApiDelegate {
     private final PapelMapper mapper;
 
     @Override
-    @Cacheable("papeisUsuarios")
     public ResponseEntity<List<PapelResponse>> getPapeisUsuarios() {
         List<Papel> papelList = service.getPapeisUsuarios();
         List<PapelResponse> responseList = mapper.toPapelResponseList(papelList);

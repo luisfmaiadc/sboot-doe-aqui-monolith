@@ -512,7 +512,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/HemocentroResponse'
+                  $ref: '#/components/schemas/HemocentroPorLocalizacaoResponse'
         '400':
           description: Requisição inválida
           content:
@@ -1061,12 +1061,32 @@ components:
         endereco:
           $ref: '#/components/schemas/Endereco'
 
+    HemocentroPorLocalizacaoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        nome:
+          type: string
+          minLength: 1
+          maxLength: 150
+        telefone:
+          type: string
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          maxLength: 100
+        prioridade:
+          type: boolean
+        endereco:
+          $ref: '#/components/schemas/Endereco'
+
     NewSolicitacaoDoacaoRequest:
       type: object
       required:
-        - idUsuario
         - idHemocentro
-        - idTipoSanguineo
       properties:
         idUsuario:
           type: integer
@@ -1074,11 +1094,6 @@ components:
         idHemocentro:
           type: integer
           format: int32
-        idTipoSanguineo:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 8
         observacoes:
           type: string
           maxLength: 2000

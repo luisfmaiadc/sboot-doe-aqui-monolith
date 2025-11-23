@@ -4,11 +4,13 @@ import com.doeaqui.sboot_doe_aqui_monolith.domain.TipoSanguineo;
 import com.doeaqui.sboot_doe_aqui_monolith.repository.TipoSanguineoRepository;
 import com.doeaqui.sboot_doe_aqui_monolith.service.TipoSanguineoService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TipoSanguineoServiceImpl implements TipoSanguineoService {
@@ -51,11 +53,13 @@ public class TipoSanguineoServiceImpl implements TipoSanguineoService {
     @Override
     @Cacheable("tiposSanguineos")
     public List<TipoSanguineo> getTiposSanguineos() {
+        log.info("[TipoSanguineoServiceImpl] Buscando tipos sanguíneos.");
         return repository.getTiposSanguineos();
     }
 
     @Override
     public String getTipoSanguineoById(Byte idTipoSanguineo) {
+        log.debug("[TipoSanguineoServiceImpl] Buscando tipo sanguíneo com ID: {}", idTipoSanguineo);
         List<TipoSanguineo> tipoSanguineoList = getTiposSanguineos();
         return tipoSanguineoList.stream()
                 .filter(t -> t.getId().equals(idTipoSanguineo))
@@ -66,6 +70,7 @@ public class TipoSanguineoServiceImpl implements TipoSanguineoService {
 
     @Override
     public void validateBloodCompatible(Byte idReceptor, Byte idDoador) {
+        log.debug("[TipoSanguineoServiceImpl] Iniciando validação de compatibilidade sanguinea de receptor {} com doador {}.", idReceptor, idDoador);
         List<Byte> receptoresCompativeis = getTipoSanguineoCompativel(idDoador);
         if (!receptoresCompativeis.contains(idReceptor)) {
             throw new IllegalArgumentException("Tipo sanguíneo incompatível.");

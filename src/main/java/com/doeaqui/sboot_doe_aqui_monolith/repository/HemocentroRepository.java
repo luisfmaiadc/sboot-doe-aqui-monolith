@@ -13,5 +13,6 @@ public interface HemocentroRepository {
     List<Hemocentro> getHemocentroByFilter(String nome, String telefone, String email);
     void patchHemocentroInfo(Hemocentro hemocentro);
     void deleteHemocentro(Integer idHemocentro);
-    Set<Integer> getHemocentroIfHasSolicitacaoDoacao(List<Integer> hemocentroIdList, List<Byte> tipoSanguineoIdList);
+    Set<Integer> getHemocentroIfHasSolicitacaoDoacao(List<Integer> hemocentroIdList, Integer idUsuario, List<Byte> tipoSanguineoIdList);
+    List<Hemocentro> getHemocentrosInfoByIds(List<Integer> nearbyHemocentroIds);
 }
